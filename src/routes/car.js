@@ -1,5 +1,5 @@
 import express from 'express';
-import { createCar, getAllCars, getCarById, updateCarById, deleteCarById } from '../controllers/car.js';
+import { createCar, getAllCars, getCarById, updateCarById, deleteCarById, getCarsByUserId } from '../controllers/car.js';
 
 const router = express.Router();
 
@@ -11,5 +11,8 @@ router.route("/:id")
     .get(getCarById)
     .put(updateCarById)
     .delete(deleteCarById);
+
+router.route("/user/:userId/")
+    .get(getCarsByUserId);
 
 export default router;

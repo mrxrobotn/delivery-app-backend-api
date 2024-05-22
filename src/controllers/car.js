@@ -75,3 +75,20 @@ export const deleteCarById = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+// Get all cars of user ID
+export const getCarsByUserId = async (req, res) => {
+  try {
+    const userId = req.params.userId; // Assuming userId is available in the request object
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Find cars where ownerId matches userId
+    const cars = await Car.find({ ownerId: userId });
+    res.status(200).json(cars);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
