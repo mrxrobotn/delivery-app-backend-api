@@ -1,4 +1,4 @@
-import { getUsers, getUserById, getUserByEmail, signup, signin, getLoggedUser, deleteUserById, updateUserById } from "../controllers/user.js";
+import { getUsers, getUserById, getUserByEmail, signup, signin, getLoggedUser, deleteUserById, updateUserById, getParentByEmail } from "../controllers/user.js";
 import express from "express";
 import verifyToken from "../middleware/auth.js";
 
@@ -14,6 +14,9 @@ router.route("/:_id")
   .get(getUserById)
   .delete(deleteUserById)
   .put(updateUserById);
+
+router.route("/email/:email")
+  .get(getParentByEmail) 
   
 // User registration
 router.route("/register")
