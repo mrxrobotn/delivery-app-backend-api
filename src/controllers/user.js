@@ -65,6 +65,20 @@ export function getUserById(req, res) {
   });
 }
 
+export function getParentByEmail(req, res) {
+  Parent.findOne({ phone: req.params.email })
+    .then((doc) => {
+      if (doc) {
+        res.status(200).json(doc);
+      } else {
+        res.status(500).json({ error: "Parent not found" });
+      }
+    })
+    .catch((err) => {
+      res.status(500).json({ error: err });
+    });
+}
+
 export function deleteUserById(req, res) {
   User.findByIdAndDelete(req.params._id)
     .then((doc) => {
