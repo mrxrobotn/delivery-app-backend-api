@@ -34,7 +34,7 @@ export async function signup(req, res) {
 }
 
 export function getLoggedUser(req, res) {
-  res.json(req.user);
+  res.json({ user: req.user });
 }
 
 export function getUserByEmail(req, res) {
