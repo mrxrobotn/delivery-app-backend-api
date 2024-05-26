@@ -65,19 +65,6 @@ export function getUserById(req, res) {
   });
 }
 
-export function getParentByEmail(req, res) {
-  Parent.findOne({ phone: req.params.email })
-    .then((doc) => {
-      if (doc) {
-        res.status(200).json(doc);
-      } else {
-        res.status(500).json({ error: "Parent not found" });
-      }
-    })
-    .catch((err) => {
-      res.status(500).json({ error: err });
-    });
-}
 
 export function deleteUserById(req, res) {
   User.findByIdAndDelete(req.params._id)
@@ -115,4 +102,34 @@ export function updateUserById(req, res) {
     .catch((err) => {
       res.status(400).json({ error: err });
     });
+}
+
+export async function updatePassword(req, res) {
+  try {
+    const userEmail = req.params.email;
+    const { oldPassword, newPassword } = req.body;
+
+    // Find the user by email
+    const user = await User.findOne({ email: userEmail });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Verify the old password
+    const isPasswordValid = await argon2.verify(user.password, oldPassword);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Invalid old password' });
+    }
+
+    // Hash the new password
+    const hashedNewPassword = await argon2.hash(newPassword, { type: argon2.argon2i });
+
+    // Update the password in the database
+    user.password = hashedNewPassword;
+    await user.save();
+
+    res.status(200).json({ message: 'Password updated successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error updating password', error: err.message });
+  }
 }
