@@ -1,7 +1,8 @@
-import { Router } from 'express';
-const router = Router();
-import { uploadFromMongoDB } from '../controllers/sound.js';
+import express from 'express';
+import { uploadMiddleware, uploadFile } from '../controllers/sound.js';
 
-router.post('/upload/mongodb', uploadFromMongoDB);
+const router = express.Router();
+
+router.route("/upload").post(uploadMiddleware, uploadFile);
 
 export default router;
