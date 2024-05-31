@@ -2,6 +2,9 @@ import express from 'express';
 import mongoose from 'mongoose';
 import morgan from 'morgan';
 import cors from 'cors';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 
 import userRoutes from './src/routes/user.js';
 import carsRoutes from './src/routes/car.js';
@@ -27,6 +30,55 @@ mongoose
   .catch(err => {
     console.log(err);
   });
+
+  const fileSchema = new mongoose.Schema({
+    filename: String,
+    path: String,
+    originalName: String,
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+  });
+
+  const File = mongoose.model('File', fileSchema);
+
+   // Multer setup
+   const storage = multer.diskStorage({
+     destination: (req, file, cb) => {
+       const uploadPath = path.join(__dirname, 'uploads');
+       if (!fs.existsSync(uploadPath)) {
+         fs.mkdirSync(uploadPath);
+       }
+       cb(null, uploadPath);
+     },
+     filename: (req, file, cb) => {
+       cb(null, `${Date.now()}-${file.originalname}`);
+     },
+   });
+
+   const upload = multer({ storage });
+
+    // Endpoint to handle file uploads
+    app.post(`${apiURL}/upload`, upload.single('file'), async (req, res) => {
+      try {
+        const fileData = new File({
+          filename: req.file.filename,
+          path: req.file.path,
+          originalName: req.file.originalname,
+        });
+ 
+        await fileData.save();
+ 
+        res.status(200).send({
+          message: 'File uploaded successfully',
+          fileUrl: `http://your-server-domain/uploads/${req.file.filename}`,
+        });
+      } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+      }
+    });
 
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
