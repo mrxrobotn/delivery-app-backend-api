@@ -124,6 +124,6 @@ app.use(express.json());
 app.use(`${apiURL}/users`, userRoutes);
 app.use(`${apiURL}/cars`, carsRoutes);
 // Serve static files
-app.use('/static', express.static(path.join(__dirname, 'public')));
+app.use(`${apiURL}/static`, express.static(path.join(__dirname, 'public')));
 
 export default app;
