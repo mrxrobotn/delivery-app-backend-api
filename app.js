@@ -7,6 +7,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import File from './src/models/audio.js'
+import ffmpeg from 'fluent-ffmpeg';
+import tf from '@tensorflow/tfjs-node';
 
 import userRoutes from './src/routes/user.js';
 import carsRoutes from './src/routes/car.js';
@@ -62,12 +64,36 @@ app.post(`${apiURL}/upload`, upload.single('file'), async (req, res) => {
       originalName: req.file.originalname,
     });
 
-    await fileData.save();
-    console.log(fileData);
-    res.status(200).send({
-      message: 'File uploaded successfully',
-      fileUrl: `${apiURL}/uploads/${req.file.filename}`,
-    });
+    console.log(fileData); // Log fileData to the console
+
+    // Apply sound filtering using ffmpeg
+    const filteredFilePath = `uploads/filtered-${req.file.filename}`;
+    
+    ffmpeg(req.file.path)
+      .audioFilters('highpass=f=300, lowpass=f=3000')
+      .on('end', async () => {
+        // Load the filtered audio file as a TensorFlow tensor
+        const audioBuffer = fs.readFileSync(filteredFilePath);
+        const audioTensor = tf.node.decodeWav(audioBuffer);
+
+        // Proceed with sending the audioTensor to TensorFlow
+        // For example, passing it to your TensorFlow model
+        // const result = yourTensorFlowModel.predict(audioTensor);
+
+        // Save the fileData after filtering and processing
+        await fileData.save();
+
+        res.status(200).send({
+          message: 'File uploaded and filtered successfully',
+          fileUrl: `${apiURL}/uploads/filtered-${req.file.filename}`,
+        });
+      })
+      .on('error', (err) => {
+        console.error('Error in audio filtering: ', err);
+        res.status(500).send('Internal Server Error');
+      })
+      .save(filteredFilePath);
+    
   } catch (error) {
     console.error(error);
     res.status(500).send('Internal Server Error');
