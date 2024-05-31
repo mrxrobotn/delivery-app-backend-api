@@ -5,6 +5,7 @@ import cors from 'cors';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import File from './src/models/audio.js'
 
 import userRoutes from './src/routes/user.js';
 import carsRoutes from './src/routes/car.js';
@@ -31,17 +32,6 @@ mongoose
     console.log(err);
   });
 
-  const fileSchema = new mongoose.Schema({
-    filename: String,
-    path: String,
-    originalName: String,
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-  });
-
-  const File = mongoose.model('File', fileSchema);
 
    // Multer setup
    const storage = multer.diskStorage({
@@ -72,7 +62,7 @@ mongoose
  
         res.status(200).send({
           message: 'File uploaded successfully',
-          fileUrl: `http://your-server-domain/uploads/${req.file.filename}`,
+          fileUrl: `${apiURL}/uploads/${req.file.filename}`,
         });
       } catch (error) {
         console.error(error);
