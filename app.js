@@ -8,7 +8,6 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 import File from './src/models/audio.js'
 import ffmpeg from 'fluent-ffmpeg';
-import tf from '@tensorflow/tfjs-node';
 
 import userRoutes from './src/routes/user.js';
 import carsRoutes from './src/routes/car.js';
@@ -64,7 +63,7 @@ app.post(`${apiURL}/upload`, upload.single('file'), async (req, res) => {
       originalName: req.file.originalname,
     });
 
-    console.log(fileData); // Log fileData to the console
+    console.log(fileData);
 
     // Apply sound filtering using ffmpeg
     const filteredFilePath = `uploads/filtered-${req.file.filename}`;
@@ -72,9 +71,8 @@ app.post(`${apiURL}/upload`, upload.single('file'), async (req, res) => {
     ffmpeg(req.file.path)
       .audioFilters('highpass=f=300, lowpass=f=3000')
       .on('end', async () => {
-        // Load the filtered audio file as a TensorFlow tensor
+        // Load the filtered audio file
         const audioBuffer = fs.readFileSync(filteredFilePath);
-        const audioTensor = tf.node.decodeWav(audioBuffer);
 
         // Proceed with sending the audioTensor to TensorFlow
         // For example, passing it to your TensorFlow model
