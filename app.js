@@ -53,6 +53,11 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+// Serve the HTML file
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // Endpoint to handle file uploads
 app.post(`${apiURL}/upload`, upload.single('file'), async (req, res) => {
   try {
@@ -104,9 +109,21 @@ app.use(function (req, res, next) {
   next();
 });
 
+// Endpoint to serve the filtered audio file
+app.get(`${apiURL}/uploads/:filename`, (req, res) => {
+  const filePath = path.join(__dirname, 'uploads', req.params.filename);
+  fs.access(filePath, fs.constants.F_OK, (err) => {
+    if (err) {
+      return res.status(404).send('File not found');
+    }
+    res.sendFile(filePath);
+  });
+});
 
 app.use(express.json());
 app.use(`${apiURL}/users`, userRoutes);
 app.use(`${apiURL}/cars`, carsRoutes);
+// Serve static files
+app.use('/static', express.static(path.join(__dirname, 'public')));
 
 export default app;

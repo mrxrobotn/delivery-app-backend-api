@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload and Play Filtered Audio</title>
+</head>
+<body>
+  <h1>Upload and Play Filtered Audio</h1>
+  <form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" id="fileInput" name="file" accept="audio/*" required>
+    <button type="submit">Upload</button>
+  </form>
+
+  <h2>Filtered Audio</h2>
+  <audio id="audioPlayer" controls>
+    Your browser does not support the audio element.
+  </audio>
+
+  <script>
+    document.getElementById('uploadForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      
+      const formData = new FormData();
+      const fileInput = document.getElementById('fileInput');
+      formData.append('file', fileInput.files[0]);
+
+      try {
+        const response = await fetch('/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const audioPlayer = document.getElementById('audioPlayer');
+          audioPlayer.src = data.fileUrl;
+          audioPlayer.load();
+          audioPlayer.play();
+        } else {
+          alert('Error uploading file');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error uploading file');
+      }
+    });
+  </script>
+</body>
+</html>
