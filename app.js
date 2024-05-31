@@ -68,6 +68,7 @@ app.post(`${apiURL}/upload`, upload.single('file'), async (req, res) => {
       message: 'File uploaded successfully',
       fileUrl: `${apiURL}/uploads/${req.file.filename}`,
     });
+    console.log(fileUrl);
   } catch (error) {
     console.error(error);
     res.status(500).send('Internal Server Error');
