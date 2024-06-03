@@ -37,7 +37,6 @@ mongoose
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Multer setup
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadPath = path.join(__dirname, 'uploads');
@@ -53,38 +52,31 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Serve the HTML file
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Endpoint to handle file uploads
 app.post(`${apiURL}/upload`, upload.single('file'), async (req, res) => {
   try {
+    const { id } = req.body;
+    if (!id) {
+      return res.status(400).send('ID is required');
+    }
+
     const fileData = new File({
       filename: req.file.filename,
       path: req.file.path,
       originalName: req.file.originalname,
+      id, // Save the ID
     });
 
-    console.log(fileData);
-
-    // Apply sound filtering using ffmpeg
     const filteredFilePath = `uploads/filtered-${req.file.filename}`;
-    
+
     ffmpeg(req.file.path)
       .audioFilters('highpass=f=300, lowpass=f=3000')
       .on('end', async () => {
-        // Load the filtered audio file
         const audioBuffer = fs.readFileSync(filteredFilePath);
-
-        // Proceed with sending the audioTensor to TensorFlow
-        // For example, passing it to your TensorFlow model
-        // const result = yourTensorFlowModel.predict(audioTensor);
-
-        // Save the fileData after filtering and processing
         await fileData.save();
-
         res.status(200).send({
           message: 'File uploaded and filtered successfully',
           fileUrl: `${apiURL}/uploads/filtered-${req.file.filename}`,
@@ -95,7 +87,7 @@ app.post(`${apiURL}/upload`, upload.single('file'), async (req, res) => {
         res.status(500).send('Internal Server Error');
       })
       .save(filteredFilePath);
-    
+
   } catch (error) {
     console.error(error);
     res.status(500).send('Internal Server Error');
