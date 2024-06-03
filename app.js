@@ -67,7 +67,7 @@ app.post(`${apiURL}/upload`, upload.single('file'), async (req, res) => {
       filename: req.file.filename,
       path: req.file.path,
       originalName: req.file.originalname,
-      id, // Save the ID
+      car: id,
     });
 
     console.log(fileData);
