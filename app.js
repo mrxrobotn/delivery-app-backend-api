@@ -58,8 +58,8 @@ app.get('/', (req, res) => {
 
 app.post(`${apiURL}/upload`, upload.single('file'), async (req, res) => {
   try {
-    const { _id } = req.body;
-    if (!_id) {
+    const { id } = req.body;
+    if (!id) {
       return res.status(400).send('ID is required');
     }
 
@@ -67,8 +67,10 @@ app.post(`${apiURL}/upload`, upload.single('file'), async (req, res) => {
       filename: req.file.filename,
       path: req.file.path,
       originalName: req.file.originalname,
-      _id, // Save the ID
+      id, // Save the ID
     });
+
+    console.log(fileData);
 
     const filteredFilePath = `uploads/filtered-${req.file.filename}`;
 

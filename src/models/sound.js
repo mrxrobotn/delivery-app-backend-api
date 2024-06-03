@@ -16,8 +16,8 @@ const audioSchema = new Schema(
         required: true,
     },
     car: {
-      type: Schema.Types.ObjectId,
-      ref: 'Car',
+      type: String,
+      required: true,
     },
   },
   {
