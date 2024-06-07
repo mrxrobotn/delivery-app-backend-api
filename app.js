@@ -6,7 +6,7 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
-import File from './src/models/sound.js'
+import File from './src/models/sound.js';
 import ffmpeg from 'fluent-ffmpeg';
 import userRoutes from './src/routes/user.js';
 import carsRoutes from './src/routes/car.js';
@@ -14,7 +14,7 @@ import carsRoutes from './src/routes/car.js';
 const app = express();
 
 const apiURL = '/api/v1';
-var db_url = '';
+let db_url = '';
 
 if (process.env.NODE_ENV === 'dev') {
   db_url = process.env.DB_URL_ATLAS;
@@ -52,10 +52,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
 app.post(`${apiURL}/upload`, upload.single('file'), async (req, res) => {
   try {
     const { id } = req.body;
@@ -77,7 +73,6 @@ app.post(`${apiURL}/upload`, upload.single('file'), async (req, res) => {
     ffmpeg(req.file.path)
       .audioFilters('highpass=f=300, lowpass=f=3000')
       .on('end', async () => {
-        const audioBuffer = fs.readFileSync(filteredFilePath);
         await fileData.save();
         res.status(200).send({
           message: 'File uploaded and filtered successfully',
@@ -117,7 +112,5 @@ app.get(`${apiURL}/uploads/:filename`, (req, res) => {
 app.use(express.json());
 app.use(`${apiURL}/users`, userRoutes);
 app.use(`${apiURL}/cars`, carsRoutes);
-// Serve static files
-app.use('/static', express.static(path.join(__dirname, 'public')));
 
 export default app;
