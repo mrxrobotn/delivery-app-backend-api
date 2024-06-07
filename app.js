@@ -73,10 +73,14 @@ app.post(`${apiURL}/upload`, upload.single('file'), async (req, res) => {
     ffmpeg(req.file.path)
       .audioFilters('highpass=f=300, lowpass=f=3000')
       .on('end', async () => {
+        const audioBuffer = fs.readFileSync(filteredFilePath);
         await fileData.save();
+
+        const fullUrl = `${req.protocol}://${req.get('host')}${apiURL}/uploads/filtered-${req.file.filename}`;
+
         res.status(200).send({
           message: 'File uploaded and filtered successfully',
-          fileUrl: `${apiURL}/uploads/filtered-${req.file.filename}`,
+          fileUrl: fullUrl,
         });
       })
       .on('error', (err) => {
